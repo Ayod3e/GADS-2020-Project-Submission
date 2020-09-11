@@ -1,0 +1,57 @@
+# LAB: Google Cloud Fundamentals: Getting Started with Compute Engine
+
+## Objectives
+In this lab, you learn how to perform the following tasks:
+
+	- Create a Compute Engine virtual machine using the Google Cloud Platform (GCP) Console.
+
+	- Create a Compute Engine virtual machine using the gcloud command-line interface.
+
+	- Connect between the two instances.
+
+## Steps:
+
+1. Create a virtual machine using the GCP Console
+
+	gcloud compute --project=qwiklabs-gcp-02-d55630da8512 instances create my-vm-1 --zone=us-central1-a --machine-type=e2-medium --subnet=default --tags=http-server --image=debian-10-buster-v20200910 --image-project=debian-cloud --boot-disk-size=10GB --boot-disk-type=pd-standard --boot-disk-device-name=my-vm-1 
+
+	gcloud compute --project=qwiklabs-gcp-02-d55630da8512 firewall-rules create default-allow-http --direction=INGRESS --priority=1000 --network=default --action=ALLOW --rules=tcp:80 --source-ranges=0.0.0.0/0 --target-tags=http-server
+
+2. Create a virtual machine using the gcloud command line
+
+	gcloud config set compute/zone us-central1-b
+
+	gcloud compute instances create "my-vm-2" \
+	--machine-type "n1-standard-1" \
+	--image-project "debian-cloud" \
+	--image "debian-9-stretch-v20190213" \
+	--subnet "default"
+
+3. Connect between VM instances
+
+	#ssh to my-vm-2
+	gcloud compute ssh my-vm-2
+
+	#ping my-vm-1 from my-vm-2
+	ping -c 4 my-vm-1
+
+	#ssh to my-vm-1 from my-vm-2
+	ssh my-vm-1
+
+	#install nginx web server
+	sudo apt-get install nginx-light -y
+
+	#nano text editor to edit home page of web server
+	sudo nano /var/www/html/index.nginx-debian.html
+
+	#add text/custom message
+	Hi from Ayodamope
+
+	#exit editor and view html code
+	curl http://localhost/
+
+	#exit the command prompt on my-vm-1
+	exit
+
+	#confirm that my-vm-2 can reach the web server on my-vm-1, at the command prompt on my-vm-2, execute command
+	curl http://my-vm-1/
