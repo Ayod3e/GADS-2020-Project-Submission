@@ -71,4 +71,5 @@
 
 ```
 Getting Started with Cloud Storage and Cloud SQL.txt
+Getting Started with Compute Engine.txt
 ```
