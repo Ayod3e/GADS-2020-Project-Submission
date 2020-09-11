@@ -1,0 +1,105 @@
+# LAB: Google Cloud Fundamentals: Getting Started with Cloud Storage and Cloud SQL
+
+## Objectives
+In this lab, you learn how to perform the following tasks:
+
+	- Create a Cloud Storage bucket and place an image into it.
+
+	- Create a Cloud SQL instance and configure it.
+
+	- Connect to the Cloud SQL instance from a web server.
+
+	- Use the image in the Cloud Storage bucket on a web page.
+
+## Steps:
+
+1. Deploy a web server VM instance
+
+	gcloud compute instances create bloghost --zone=us-central1-a --machine-type=e2-medium --subnet=default --metadata=startup-script=apt-get\ update$'\n'apt-get\ install\ apache2\ php\ php-mysql\ -y$'\n'service\ apache2\ restart --tags=http-server --image=debian-10-buster-v20200910 --image-project=debian-cloud 
+
+	gcloud compute firewall-rules create default-allow-http --direction=INGRESS --priority=1000 --network=default --action=ALLOW --rules=tcp:80 --source-ranges=0.0.0.0/0 --target-tags=http-server
+	
+	#get external IP Address
+	gcloud compute instances list
+
+2. Create a Cloud Storage bucket and place an image into it.
+
+	gsutil mb -l us-central1-a gs://$DEVSHELL_PROJECT-ID
+	
+	gsutil cp gs://cloud-training/gcpfci/my-excellent-blog.png my-excellent-blog.png
+	
+	gsutil cp my-excellent-blog.png gs://$DEVSHELL_PROJECT_ID/my-excellent-blog.png
+
+	gsutil acl ch -u allUsers:R gs://$DEVSHELL_PROJECT_ID/my-excellent-blog.png
+
+3. Create a Cloud SQL instance and configure it.
+
+	#create SQL instance and authorized network
+	gcloud sql instances create blog-db --tier=db-n1-standard-2 --region=us-central1-a --authorized-networks = web front end, 104.154.182.72/32
+	
+	gcloud sql users set-password root --host=% --instance blog-db --password 12345678
+
+	#get IP address details of SQL instance
+	gcloud sql instances list	
+
+	#add user account	
+	gcloud sql users create blogdbuser \--host=% --instance=blog-db --password=87654321
+
+4. Configure an application in a Compute Engine instance to use Cloud SQL
+
+	#ssh to bloghost instance
+	gcloud compute ssh bloghost
+
+	#change working directory to the document root of the web server
+	cd /var/www/html
+
+	#edit index file
+	sudo nano index.php
+
+	#copy and paste php content
+	<html>
+	<head><title>Welcome to my excellent blog</title></head>
+	<body>
+	<h1>Welcome to my excellent blog</h1>
+	<?php
+ 	$dbserver = "CLOUDSQLIP";
+	$dbuser = "blogdbuser";
+	$dbpassword = "DBPASSWORD";
+	// In a production blog, we would not store the MySQL
+	// password in the document root. Instead, we would store it in a
+	// configuration file elsewhere on the web server VM instance.
+
+	$conn = new mysqli($dbserver, $dbuser, $dbpassword);
+
+	if (mysqli_connect_error()) {
+        	echo ("Database connection failed: " . mysqli_connect_error());
+	} else {
+        	echo ("Database connection succeeded.");
+	}
+	?>
+	</body></html>
+
+	#restart web server
+	sudo service apache2 restart
+	
+	*Database connection failed
+
+	#edit index file to input dbserver and dbpassword
+	sudo nano index.php
+
+	*Database connection succeeded
+
+	
+5. Configure an application in a Compute Engine instance to use a Cloud Storage object
+
+	#edit html file
+	sudo nano index.php
+
+	#input url to cloud storage object after h1 element 
+	<img src='https://storage.googleapis.com/qwiklabs-gcp-03-4c18bd5dbd11/my-excellent-blog.png'>
+
+	#restart web server
+	sudo service apache2 restart
+
+	sudo service apache2 restart
+	
