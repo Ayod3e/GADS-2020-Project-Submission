@@ -1,7 +1,6 @@
 # GADS-2020-Project Submission
 
-##Ayodamope Omolade
-## QwikLabs Completed
+## QwikLabs Completed - Ayodamope Omolade
 
 <details>
   <summary>Lab 1: Google Cloud Fundamentals - Getting Started with Cloud Marketplace</summary>
