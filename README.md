@@ -70,5 +70,5 @@
 ## Translation code
 
 ```
-Your translations code can rest here
+Getting Started with Cloud Storage and Cloud SQL.txt
 ```
